@@ -1,0 +1,229 @@
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.15/angular.min.js"></script>
+    <script src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/jquery.validate.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <style type='text/css'>
+        .container{
+          padding-top: 70px!important;
+      }
+      .submit{
+          border-color: #ff9900;
+      }
+      .submit:hover{
+          border-color: #000;
+          background-color: #fff;
+          color: #ff9900;
+      }
+      input.error {
+        border: 1px solid red;
+        float: left;
+    }
+    label.error {
+        padding-left: 16px;
+        margin-left: .3em;
+        color: red;
+    }
+    .badge{
+      background-color: #ff9900!important;
+      color: #000!important;
+  }
+</style>
+</head>
+
+<body ng-app="myApp">
+    <div ng-controller="myController" ng-init="init();">
+        <nav class="navbar navbar-default navbar-fixed-top">
+            <div class="navbar-header">
+              <a class="navbar-brand" href="#">Reuters TV Syndicated Player Embed Tag Builder</a>
+          </div>
+      </nav>
+      <div class="container" ng-app="" ng-init="tag">
+        <div class="col-md-12">
+            <div class="col-md-4">
+                <form id="form">
+                    <p>Account #:
+                        <input type="text" class="form-control accountNumber" ng-model="accountNumber" id="accountNumber" name="Account">
+                    </p>
+                    <p>Hosting Domain:
+                        <input type="text" class="form-control domain domainChk" id="domain" name="Domain" ng-model="domain" placeholder="enter hosting domain name">
+                        <small><strong>(Required)</strong> Top level domain name of site where you will be embedding the player.  For example, “dailynews.com”</small>
+                    </p>
+                    <br />
+                    <p>Player placeholder class:
+                        <input type="text" class="form-control playerClass" id="playerClass" ng-model="playerClass" name="PlayerClass" placeholder="player placeholder class">
+                        <small>
+                            <strong>(Required)</strong> Page div where you’d like the player to appear. If this container is less than 400px wide, the player will operate in portrait mode and use a modal window to present the video. If the container is 400px or greater, the player will operate in landscape mode and present the video in the container.
+                        </small>
+                    </p>
+                    <br />
+                    <p>Font family class:
+                        <input type="text" class="form-control fontClass" id="fontClass" ng-model="fontTag" placeholder="enter your tag name">
+                        <small>(Optional) A text element class name from which the player will extract the font-family for displaying current program headlines. Expects String element class. It will grab the first font-family element if there's more than one element with the same classname </small>
+
+                    </p>
+                    <br />
+                    <p>Video Pre-Roll Ad Tag:
+                        <textarea class="form-control adTag" id="adTag" ng-model="adTag"></textarea>
+                        <small>(Optional) The player integrates <a href='https://developers.google.com/interactive-media-ads/' target="_blank">Google’s IMA HTML5 SDK</a>. If you would like to run pre-roll ads, the SDK supports DoubleClick for Publishers, Google AdSense, or any VAST-compliant ad requests.</small>
+                    </p>
+                    <p><button class="btn btn-default submit" type="submit">Submit</button>
+                        <div class="btn btn-default reset">Edit</div></p>
+                        <br />
+                    </form>
+                </div>
+                <div class="col-md-8 directions">
+                    <h4>Provide a hosting domain and player div for Reuters TV Syndicated Player code</h4>
+                    <p><div class="render-info"></div></p>
+                </div>
+
+                <div class="col-md-8 player-code">
+                  <div class="panel panel-default">
+                    <div class="panel-heading">
+                      <p><div class="badge">Step 1</div>  Copy and paste the player div where you'd like the syndicated player to show in your page</p>
+                      <div class="panel-body">
+                        <pre>&ltdiv class="{{playerClass}}"&gt&lt/div&gt</pre>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                  <p><div class="badge">Step 2</div>  Copy and paste the syndicated player code anywhere before the <code>&lt/body&gt</code> of your page.</p>
+              </div>
+              <div class="panel-body">
+                <pre>
+
+&ltscript type="text/javascript" src="//cdnstatic.reuters.tv/clientJs/?files=public/syndicatedPlayerClient/js/syndicatedPlayerSetup(source)V02.js&v11"&gt&lt/script&gt
+&ltscript type="text/javascript"&gt
+window.addEventListener("load", function(e) {
+    var playerH = new reutersTV({
+    adTag:"{{adTag}}",
+    fontElClass:"{{fontTag}}",
+    playerClass:"{{playerClass}}",
+    publisherId:"{{accountNumber}}"
+    });
+});
+&lt/script&gt
+        </pre>
+    </div>
+</div>
+</div>
+</div>
+</div>
+<script type="text/javascript">
+    var myApp = angular.module("myApp", []);
+
+    myApp.controller("myController", function($scope, $http){
+
+     $scope.init = function () {
+        var urlParts = window.location.href.split('?id=');
+        var accountNumber = urlParts[1];
+
+        if (!accountNumber) {
+            $(".accountNumber-alert").val("Enter account number");
+        } else {
+            $scope.accountNumber = accountNumber;
+            $(".accountNumber").css("background-color", "#eee");
+        }
+    }
+});
+
+    $('.accountNumber').keyup(function () {
+        this.value = this.value.replace(/[^0-9\.]/g, '');
+    });
+
+    $(".player-code, .submit, .reset").hide();
+    $(function () {
+        $("#form").validate({
+            rules: {
+                domain: {
+                    required: true
+                },
+                playerClass: {
+                    required: true,
+                },
+                accountNumber: {
+                    required: true
+                }
+            },
+            submitHandler: function (form) {
+
+                var dataString = $('form').serializeObject();
+            //Save Form Data........
+            $.ajax({
+                type: "POST",
+                url: "/syndicatedPlayerTagService/",
+                data: dataString,
+                success: function () {
+                    $(".player-code").show();
+                    $(".accountNumber, .domain, .playerClass, .fontClass, .adTag, .submit").attr("disabled", true);
+                    $('.render-info').html("<div class='alert alert-success'>You've successfully built your player code</div>");
+                },
+                error: function () {
+                    $(".accountNumber, .domain, .playerClass, .fontClass, .adTag, .submit").attr("disabled", true);
+                    $('.render-info').html("<div class='alert alert-warning'>Submission Error. Can't create player code for account: " + domain.value + "</div>");
+                }
+            });
+        }
+    });
+});
+
+jQuery.validator.addMethod("domainChk", function (value, element, params) {
+    if (this.optional(element)) return true;
+    var regExp = new RegExp("^(http:\/\/www|https:\/\/www|https\://|http\://)?[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(/\S*)?$");
+    return regExp.test(value);
+}, "Valid hostname required for player code");
+
+jQuery.validator.addClassRules({
+    domainChk: {
+        domainChk: true
+    }
+});
+
+//VALIDATE AD TAG HAS VALID PROTOCOL
+jQuery.validator.addMethod("adTag", function (value, element, params) {
+    if (this.optional(element)) return true;
+    var regExp = new RegExp("^(https?:\/\/)");
+    return regExp.test(value);
+}, 'Please enter a valid URL (e.g.: http://)');
+
+jQuery.validator.addClassRules({
+    adTag: {
+      adTag: true
+  }
+});
+
+//VALIDATE ON KEYUP
+$('input[type="text"]').on('click keyup blur', function () {
+    if ($('#form').valid()) {
+        $(".submit").show();
+    } else {
+        $(".submit").hide();
+    }
+});
+
+//LOOP THROUGH FORM FIELDS AND SERIALIZE JSON
+$.fn.serializeObject = function () {
+    var o = {};
+    var a = this.serializeArray();
+    $.each(a, function () {
+        if (o[this.name] !== undefined) {
+            if (!o[this.name].push) {
+                o[this.name] = [o[this.name]];
+            }
+            o[this.name].push(this.value || '');
+        } else {
+            o[this.name] = this.value || '';
+        }
+    });
+    return o;
+};
+</script>
+</body>
+</html>
